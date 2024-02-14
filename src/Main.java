@@ -13,7 +13,10 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Scanner;
 
 import org.json.JSONArray;
@@ -64,7 +67,109 @@ public class Main {
 			System.out.println("It will remove:");
 			System.out.println("- The elements you type");
 			System.out.println("- The elements whose recipes include the elements you type");
-			System.out.println("- The elements you type");
+			System.out.println("- The elements whose recipes include said elements above");
+			System.out.println("- Et cetera...");
+			System.out.println("- The attempted combinations which include ALL elements that fall into the above categories");
+			System.out.println("- Interest/Boredom data of ALL elements that fall into the above categories");
+			System.out.println("Suggested use case: You found invalid formulas by using (g) and want to remove them.");
+			System.out.print("Input Filename to PURGE? ");
+			String infilename = in.nextLine();
+			System.out.print("Output Filename to WRITE the purged file? (Can be the same)");
+			String outfilename = in.nextLine();
+
+			JSONObject dataJson = readJSONObjectFile(infilename);
+
+			JSONArray attemptTrackerJSON = dataJson.getJSONArray("triedCombinations");
+			knownWords = knownJsonToList(dataJson.getJSONArray("knownElements"));
+			if (dataJson.has("interestBoredom")) {
+				interestBoredom = dataJson.getJSONObject("interestBoredom");
+			} else {
+				interestBoredom = new JSONObject();
+			}
+			JSONObject recipeBookJSON = dataJson.getJSONObject("recipes");
+			recipeBook = new RecipeBook(recipeBookJSON); // original recipe book
+
+			Queue<String> purgedKnownWords = new LinkedList<>();
+			Queue<String> purgeWords = new LinkedList<>();
+
+			System.out.print("Element to prune? (Blank = finished) ");
+			String elem = in.nextLine();
+
+			while (elem.length() > 0) {
+				purgeWords.add(elem);
+				System.out.print("Element to prune? (Blank = finished) ");
+				elem = in.nextLine();
+
+			}
+
+			purgedKnownWords.addAll(knownWords);
+			int prevSize = 0;
+			int curSize = purgeWords.size();
+
+			int passes = 0;
+
+			System.out.println("Stage #1: Searching for elements to be pruned");
+
+			while (prevSize != curSize) {
+
+				passes++;
+				System.out.print("Pass #" + passes + ": ");
+
+				Iterator<String> knownIter = purgedKnownWords.iterator();
+
+				// searching and adding stuff to purgeWords, don't purge just yet
+
+				while (knownIter.hasNext()) {
+					String cur = knownIter.next();
+					// System.out.println(cur);
+					Tuple<String, String> recipe = recipeBook.getRecipe(cur);
+					for (String r : purgeWords) {
+						if (recipe != null && (recipe.x.equals(r) || recipe.y.equals(r)) && !purgeWords.contains(cur)) {
+							purgeWords.add(cur);
+							break;
+						}
+					}
+				}
+
+				System.out.println("Found " + (curSize - prevSize) + " additional purge words");
+				prevSize = curSize;
+				curSize = purgeWords.size();
+
+			}
+
+			// purge from interestBoredom, known elements, and recipe book
+			System.out.println("Stage #2: Pruning from interestBoredom, known elements, and recipe book");
+
+			Iterator<String> knownIter = purgedKnownWords.iterator();
+			while (knownIter.hasNext()) {
+				String cur = knownIter.next();
+				if (purgeWords.contains(cur)) {
+					knownIter.remove();
+					interestBoredom.remove(cur);
+					recipeBookJSON.remove(cur);
+				}
+			}
+
+			// purge from attempt tracker
+			System.out.println("Stage #3: Pruning from attempt tracker");
+			Iterator<Object> attIter = attemptTrackerJSON.iterator();
+			while (attIter.hasNext()) {
+				JSONArray triedComboJA = (JSONArray) attIter.next();
+				String a = triedComboJA.getString(0);
+				String b = triedComboJA.getString(1);
+
+				for (String s : purgeWords) {
+					if (a.equals(s) || b.equals(s)) {
+						attIter.remove();
+						break;
+					}
+				}
+			}
+
+			System.out.println("origi size " + dataJson.getJSONArray("knownElements").length());
+			System.out.println("new size " + purgedKnownWords.size());
+			System.out.println("diff " + (dataJson.getJSONArray("knownElements").length() - purgedKnownWords.size()));
+			System.out.println("expected " + purgeWords.size());
 
 		}
 
