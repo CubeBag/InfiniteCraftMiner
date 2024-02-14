@@ -170,6 +170,7 @@ public class Main {
 			System.out.println("new size " + purgedKnownWords.size());
 			System.out.println("diff " + (dataJson.getJSONArray("knownElements").length() - purgedKnownWords.size()));
 			System.out.println("expected " + purgeWords.size());
+			System.out.println("purged:" + purgeWords);
 
 		}
 
