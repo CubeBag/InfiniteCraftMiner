@@ -1,0 +1,6 @@
+/bin/
+*.txt
+/data/
+*.json
+/lib/*
+/.settings/
