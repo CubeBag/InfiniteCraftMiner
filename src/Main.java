@@ -72,9 +72,9 @@ public class Main {
 			System.out.println("- The attempted combinations which include ALL elements that fall into the above categories");
 			System.out.println("- Interest/Boredom data of ALL elements that fall into the above categories");
 			System.out.println("Suggested use case: You found invalid formulas by using (g) and want to remove them.");
-			System.out.print("Input Filename to PURGE? ");
+			System.out.print("Input Filename to process by pruning? ");
 			String infilename = in.nextLine();
-			System.out.print("Output Filename to WRITE the purged file? (Can be the same)");
+			System.out.print("Output Filename to WRITE the pruned file? (Can be the same)");
 			String outfilename = in.nextLine();
 
 			JSONObject dataJson = readJSONObjectFile(infilename);
@@ -131,7 +131,7 @@ public class Main {
 					}
 				}
 
-				System.out.println("Found " + (curSize - prevSize) + " additional purge words");
+				System.out.println("Found " + (curSize) + " elements to prune");
 				prevSize = curSize;
 				curSize = purgeWords.size();
 
@@ -151,8 +151,9 @@ public class Main {
 			}
 
 			// purge from attempt tracker
-			System.out.println("Stage #3: Pruning from attempt tracker");
+			System.out.println("Stage #3: Pruning from attempt tracker (forgetting previous attempts)");
 			Iterator<Object> attIter = attemptTrackerJSON.iterator();
+			int rmCount = 0;
 			while (attIter.hasNext()) {
 				JSONArray triedComboJA = (JSONArray) attIter.next();
 				String a = triedComboJA.getString(0);
@@ -160,17 +161,26 @@ public class Main {
 
 				for (String s : purgeWords) {
 					if (a.equals(s) || b.equals(s)) {
+						rmCount++;
 						attIter.remove();
 						break;
 					}
 				}
 			}
+			System.out.println("Forgot " + rmCount + " previously-tried combinations");
 
 			System.out.println("origi size " + dataJson.getJSONArray("knownElements").length());
 			System.out.println("new size " + purgedKnownWords.size());
 			System.out.println("diff " + (dataJson.getJSONArray("knownElements").length() - purgedKnownWords.size()));
 			System.out.println("expected " + purgeWords.size());
-			System.out.println("purged:" + purgeWords);
+			System.out.println("pruned:" + purgeWords);
+
+			List<String> aaaa = new ArrayList<>();
+			aaaa.addAll(purgedKnownWords);
+
+			exportFile(attemptTrackerJSON, exportKnownJson(aaaa), recipeBookJSON, interestBoredom, outfilename);
+
+			System.out.println("Great Success !!");
 
 		}
 
