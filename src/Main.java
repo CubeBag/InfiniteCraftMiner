@@ -292,6 +292,12 @@ public class Main {
 				String elem = secElements.remove(0);
 				if (!primElements.contains(elem)) {
 					Tuple<String, String> recipe = secRecipe.getRecipe(elem);
+					if (recipe == null) {
+						System.out.print("Secondary references an element that does NOT exist in primary: ");
+						System.out.println(elem);
+						System.out.println("Because of this, the operation will now be aborted with no change to any file.");
+						return;
+					}
 					if (primElements.contains(recipe.x) && primElements.contains(recipe.y)) {
 						primElements.add(elem);
 						primRecipe.addEntry(elem, recipe.x, recipe.y);
