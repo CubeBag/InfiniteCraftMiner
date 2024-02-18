@@ -4,4 +4,3 @@
 *.json
 /lib/*
 /.settings/
-.DS_Store
