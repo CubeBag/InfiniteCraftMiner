@@ -474,14 +474,7 @@ public class Main {
 					boolean newDiscovery = false;
 					boolean discovery = false;
 
-					if (result.contains("%20")) {
-						System.out.println("👺👺👺👺👺👺 BURNED RESULT 👺👺👺 %20 VICTIM");
-						System.out.println("***" + first + " + " + second + " = " + result);
-						System.out.println("***This is a FAKE discovery.");
-						System.out.println(json);
-						System.out.println("***The combination will not be tried again.");
-
-					} else if (!result.equals("Nothing")) {
+					if (!result.equals("Nothing")) {
 
 						String outString = first + " + " + second + " = " + result;
 						if (json.has("emoji")) {
