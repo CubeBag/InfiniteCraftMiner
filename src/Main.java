@@ -580,6 +580,13 @@ public class Main {
 		}
 	}
 
+	public static HttpRequest.Builder addHeaders(HttpRequest.Builder noHead) {
+		return noHead.header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0")
+				.header("Referer", "https://neal.fun/infinite-craft/").header("Accept", "*/*").header("Accept-Language", "en-US,en;q=0.8,ja;q=0.5,zh-CN;q=0.3")
+				.header("DNT", "1").header("Sec-GPC", "1").header("Sec-Fetch-Dest", "empty").header("Sec-Fetch-Mode", "cors")
+				.header("Sec-Fetch-Site", "same-origin").header("TE", "trailers");
+	}
+
 	public static JSONObject tryCombination(String a, String b, HttpClient client) throws URISyntaxException, IOException, InterruptedException {
 
 		String uri = "https://neal.fun/api/infinite-craft/pair";
@@ -590,9 +597,7 @@ public class Main {
 
 		// System.out.println(uri);
 
-		HttpRequest request = HttpRequest.newBuilder(combiner).GET()
-				.header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0")
-				.header("Referer", "https://neal.fun/infinite-craft/").header("Accept", "*/*").build();
+		HttpRequest request = addHeaders(HttpRequest.newBuilder(combiner).GET()).build();
 
 		HttpResponse<String> response = null;
 		while (response == null) {
@@ -612,9 +617,7 @@ public class Main {
 			System.out.println("Calming my titties...");
 			client = newClientFromArgs(null);
 			Thread.sleep(23530);
-			request = HttpRequest.newBuilder(combiner).GET()
-					.header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0")
-					.header("Referer", "https://neal.fun/infinite-craft/").header("Accept", "*/*").build();
+			request = addHeaders(HttpRequest.newBuilder(combiner).GET()).build();
 			System.out.println("request hashCode" + request.hashCode());
 			System.out.println(request.headers());
 			System.out.println(request.toString());
